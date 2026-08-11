@@ -1,0 +1,28 @@
+# Local deal cache and price history — contains your ZIP code and the
+# stores you shop at. Never commit this.
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+.mcp.json
+*.local.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+uv.lock
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/

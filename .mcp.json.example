@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "grocery-deals": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/absolute/path/to/grocery-deals-mcp",
+        "grocery-deals-mcp"
+      ],
+      "env": {
+        "GROCERY_ZIP": "12345"
+      }
+    }
+  }
+}
