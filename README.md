@@ -144,9 +144,15 @@ specific store. It covers every Kroger banner — Kroger, Harris Teeter, Ralphs,
 Fred Meyer, King Soopers, QFC, Smith's, Fry's.
 
 1. Register a free app at [developer.kroger.com](https://developer.kroger.com)
+   and request the **Products** API
 2. Set `KROGER_CLIENT_ID` and `KROGER_CLIENT_SECRET`
 3. Ask the agent to run `kroger_find_stores`, then set `KROGER_LOCATION_ID` to
    the store you use (or pass `location_id` per call)
+
+`kroger_find_stores` accepts everyday chain names — "Harris Teeter" works, and
+so does Kroger's internal code for it (`HART`). Matching happens client-side
+because Kroger's own `filter.chain` takes undocumented codes and answers an
+unrecognized one with an empty list rather than an error.
 
 Free tier allows 10,000 calls/day. Everything else in this server works
 without it.

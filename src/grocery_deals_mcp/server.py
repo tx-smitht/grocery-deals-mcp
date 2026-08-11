@@ -408,7 +408,9 @@ async def kroger_find_stores(zip_code: str = "", chain: str = "") -> str:
 
     Args:
         zip_code: 5-digit US ZIP code. Optional if GROCERY_ZIP is set.
-        chain: optional banner filter, e.g. "HARRISTEETER", "KROGER", "RALPHS".
+        chain: optional banner filter, e.g. "Harris Teeter", "Kroger",
+            "Ralphs". Matched against store name and chain code, so the
+            everyday spelling works.
     """
     try:
         zip_code = resolve_zip(zip_code)

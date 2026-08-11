@@ -59,17 +59,26 @@ async def _access_token(client: httpx.AsyncClient) -> str:
     return _token["value"]
 
 
-async def find_location(zip_code: str, chain: str = "") -> list[dict]:
+def _squash(s: str) -> str:
+    return "".join(c for c in (s or "").lower() if c.isalnum())
+
+
+async def find_location(zip_code: str, chain: str = "", limit: int = 10) -> list[dict]:
     """Kroger-banner store IDs near a ZIP. Needed once, for KROGER_LOCATION_ID.
 
     Args:
         zip_code: 5-digit US ZIP to search near.
-        chain: optional banner filter, e.g. "HARRISTEETER", "KROGER",
-            "RALPHS". Omit to see every Kroger-family store nearby.
+        chain: optional banner filter. Matched against both the store name
+            and Kroger's internal chain code, so "Harris Teeter", "harristeeter"
+            and "HART" all work. Omit for every Kroger-family store nearby.
+        limit: how many stores to return.
+
+    Kroger's own `filter.chain` takes undocumented internal codes (Harris
+    Teeter is "HART", not "HARRISTEETER") and returns an empty list rather
+    than an error for an unrecognized one. Filtering client-side instead
+    means a plausible-looking guess can't silently yield nothing.
     """
-    params = {"filter.zipCode.near": zip_code, "filter.limit": 10}
-    if chain:
-        params["filter.chain"] = chain.upper().replace(" ", "")
+    params = {"filter.zipCode.near": zip_code, "filter.limit": max(limit, 25)}
     async with httpx.AsyncClient(timeout=HTTP_TIMEOUT) as client:
         token = await _access_token(client)
         resp = await client.get(
@@ -79,6 +88,14 @@ async def find_location(zip_code: str, chain: str = "") -> list[dict]:
         )
     if resp.status_code != 200:
         raise KrogerError(f"Kroger locations failed ({resp.status_code}).")
+
+    data = resp.json().get("data", [])
+    if chain:
+        want = _squash(chain)
+        data = [
+            loc for loc in data
+            if want in _squash(loc.get("chain")) or want in _squash(loc.get("name"))
+        ]
     return [
         {
             "location_id": loc.get("locationId"),
@@ -95,7 +112,7 @@ async def find_location(zip_code: str, chain: str = "") -> list[dict]:
                 )
             ),
         }
-        for loc in resp.json().get("data", [])
+        for loc in data[:limit]
     ]
 
 
